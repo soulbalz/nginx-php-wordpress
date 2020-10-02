@@ -22,7 +22,7 @@ jobs:
         SHA1=$( curl -fsSL "https://wordpress.org/wordpress-${NEW_TAG}.tar.gz.sha1" )
         CURRENT_TAG=$( curl -sH \"Authorization: JWT ${TOKEN}\" \"https://hub.docker.com/v2/repositories/${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}/tags/${NEW_TAG}/\" | jq -r '.name' )
 
-        if [ $NEW_TAG = $CURRENT_TAG ]; then
+        if [ "$NEW_TAG" = "$CURRENT_TAG" ]; then
           echo "Nothing new to build";
         else
           echo "Login to dockerhub";
