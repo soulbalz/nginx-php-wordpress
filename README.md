@@ -32,5 +32,5 @@ File                                                | Description
 `/opt/docker/etc/php/fpm/pool.d/application.conf`   | PHP FPM pool configuration
 
 ## More info
-- https://webdevops.io/projects/dockerfiles/
+- https://webdevops.gitbook.io/dockerfile/
 - https://hub.docker.com/_/wordpress
