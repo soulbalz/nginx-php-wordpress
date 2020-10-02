@@ -9,7 +9,8 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  build:
+  build-schedule:
+    if: github.event == 'schedule'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -37,3 +38,27 @@ jobs:
           docker tag "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:latest" "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:${NEW_TAG}";
           docker push "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:${NEW_TAG}";
         fi
+
+  build-change:
+    if: github.event != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build the Docker image
+      run: |
+        DOCKER_REPO="nginx-php-wordpress"
+
+        NEW_TAG=$( curl -fsSL 'http://api.wordpress.org/core/version-check/1.7/' | jq -r '.offers[0].current' )
+        SHA1=$( curl -fsSL "https://wordpress.org/wordpress-${NEW_TAG}.tar.gz.sha1" )
+
+        echo "Login to dockerhub";
+        docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }};
+        echo "Start building new image";
+        
+        docker build --build-arg WORDPRESS_VERSION="${NEW_TAG}" --build-arg WORDPRESS_SHA1="${SHA1}" -t "${DOCKER_REPO}" . ;
+        echo "Push new image with tags";
+        
+        docker tag ${DOCKER_REPO} "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:latest";
+        docker push "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:latest";
+        docker tag "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:latest" "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:${NEW_TAG}";
+        docker push "${{ secrets.DOCKER_HUB_USERNAME }}/${DOCKER_REPO}:${NEW_TAG}";

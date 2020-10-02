@@ -24,8 +24,8 @@ file_env() {
 }
 
 
-user="$(id -u)"
-group="$(id -g)"
+user="application"
+group="application"
 
 if [ ! -e index.php ] && [ ! -e wp-includes/version.php ]; then
   # if the directory exists and WordPress doesn't appear to be installed AND the permissions of it are root:root, let's chown it (likely a Docker-created directory)
@@ -267,3 +267,6 @@ EOPHP
     echo >&2
   fi
 fi
+
+
+chown -R "$user:$group" /var/www/html
